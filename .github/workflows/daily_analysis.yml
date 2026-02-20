@@ -1,11 +1,11 @@
 name: 每日股票分析
 
 on:
-  # 定时触发 - 每个交易日运行三次（北京时间）
+  # 定时触发 - 每个交易日运行三次（美国中部时间 CST = UTC-6）
   schedule:
-    - cron: '0 1 * * 1-5'    # 盘前：UTC 01:00 = 北京时间 09:00
-    - cron: '0 4 * * 1-5'    # 午间：UTC 04:00 = 北京时间 12:00
-    - cron: '0 6 * * 1-5'    # 下午：UTC 06:00 = 北京时间 14:00
+    - cron: '0 15 * * 1-5'   # Pre-market:  UTC 15:00 = 9:00 AM CST
+    - cron: '0 18 * * 1-5'   # Lunch:       UTC 18:00 = 12:00 PM CST
+    - cron: '0 20 * * 1-5'   # Afternoon:   UTC 20:00 = 2:00 PM CST
 
   # 手动触发
   workflow_dispatch:
@@ -52,9 +52,9 @@ jobs:
             SESSION="$OVERRIDE"
           else
             HOUR_UTC=$(TZ=UTC date '+%-H')
-            if [ "$HOUR_UTC" -eq 1 ]; then
+            if [ "$HOUR_UTC" -eq 15 ]; then
               SESSION="pre-market"
-            elif [ "$HOUR_UTC" -eq 4 ]; then
+            elif [ "$HOUR_UTC" -eq 18 ]; then
               SESSION="lunch"
             else
               SESSION="afternoon"
@@ -194,16 +194,16 @@ jobs:
 
           # Session label for display
           case "$ANALYSIS_SESSION" in
-            pre-market) SESSION_LABEL="盘前（09:00）" ;;
-            lunch)      SESSION_LABEL="午间（12:00）" ;;
-            afternoon)  SESSION_LABEL="下午（14:00）" ;;
-            *)          SESSION_LABEL="未知时段" ;;
+            pre-market) SESSION_LABEL="Pre-market (9:00 AM CT)" ;;
+            lunch)      SESSION_LABEL="Lunch (12:00 PM CT)" ;;
+            afternoon)  SESSION_LABEL="Afternoon (2:00 PM CT)" ;;
+            *)          SESSION_LABEL="Unknown session" ;;
           esac
 
           echo "=========================================="
           echo "🚀 A股自选股智能分析系统"
           echo "=========================================="
-          echo "⏰ 时间: $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')"
+          echo "⏰ 时间 (CT): $(TZ='America/Chicago' date '+%Y-%m-%d %H:%M:%S %Z')"
           echo "📅 时段: $SESSION_LABEL"
           echo "🎯 运行模式: $MODE"
           echo "📊 自选股: $STOCK_LIST"
